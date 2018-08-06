@@ -20,10 +20,10 @@ similarUsers = accessUntappd.getSimilarUsers(usersTopBeers)
 accessUntappd.updateSimilarityIndex(similarUsers, usersTopBeers)
 
 # Obtain list of beer names from menu picture
-menuBeerList = pictureToText.pictureToText(pictureFile)
+menuBeerList = pictureToText.extractBeerNamesFromImg(pictureFile)
 
-# Obtain menu beers
-#menuBeers = accessUntappd.getBeerIds(menuBeerList)
+# Convert list of 
+menuBeers = accessUntappd.getBeerIds(menuBeerList)
 
 # Go through the menu beers and update its score
 
