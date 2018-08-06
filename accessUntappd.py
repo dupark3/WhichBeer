@@ -58,7 +58,7 @@ def updateSimilarityIndex(similarUsers, usersTopBeers):
         similarUsersTopBeers = []
         offset = 0
         reachedEndOfBeers = False 
-        while not reachedEndOfBeers:
+        while not reachedEndOfBeers or offset > 150:
             res = requests.get(baseURL + 
                 '/user/beers/%s?client_id=%s&client_secret=%s&limit=50&offset=%s&sort=highest_rated_you'
                 %(user, clientId, clientSecret, str(offset)))
@@ -80,7 +80,17 @@ def updateSimilarityIndex(similarUsers, usersTopBeers):
 
 
 def getBeerIds(menuText):
-    
+    beerIDs = []
+    for beer in menuText:
+        res = requests.get(baseURL + 
+            'search/beer/%s?client_id=%s&client_secret=%sq=%s'
+            %(clinetId, clientSecret, beer))
+        beerSearchData = res.json()
+        if beerSearchData['found'] != 0:
+            beerIDs.append(beerSearchData['beers']['items'][0]['beer']['bid'])
+    return beerIDs
+
+
 # Iterate through menuBeers, looking for it in the topBeers of similarUsers
 # If found, use similarityIndex w user and similarUser's rating to calculate rating
 # If found again in another similarUser, amplify score even further
