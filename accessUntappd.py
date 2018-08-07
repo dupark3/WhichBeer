@@ -14,13 +14,13 @@ def getUsersTopBeers(user):
     res = requests.get(baseURL + 
         '/user/beers/%s?client_id=%s&client_secret=%s&sort=highest_rated_you&limit=5' 
         %(user, client_id, client_secret))
-    userBeerData = res.json()
+    userBeerData = res.json()['response']['beers']['items']
 
     # Parse through userBeerData and obtain top 5 beer IDs
     ### Could change this to top 10% beers?
     usersTopBeers = []
-    for i in range(max(5, len(userBeerData['response']['beers']['items']))):
-        usersTopBeers.append(userBeerData['response']['beers']['items'][i]['beer']['bid'])    
+    for i in range(max(5, len(userBeerData))):
+        usersTopBeers.append(userBeerData[i]['beer']['bid'])    
 
     return usersTopBeers
 
