@@ -3,29 +3,31 @@
 import accessUntappd, pictureToText, calculateScore
 import sys
 
-if len(sys.argv) < 2:
-    print('Usage : ./whichbeer.py <username> <menuPictureFileName>')
-    sys.exit()
+def main():
+    if len(sys.argv) < 2:
+        print('Usage : ./whichbeer.py <username> <menuPictureFileName>')
+        sys.exit()
 
-username = sys.argv[1]
-pictureFile = sys.argv[2]
+    username = sys.argv[1]
+    pictureFile = sys.argv[2]
 
-# Find up to 10 top rated beers by user
-usersTopBeers = accessUntappd.getUsersTopBeers(username)
+    # Find up to 10 top rated beers by user
+    usersTopBeers = accessUntappd.getUsersTopBeers(username)
+    print(usersTopBeers)
 
-# Find other users who also rated the top 10 beers highly
-similarUsers = accessUntappd.getSimilarUsers(usersTopBeers)
+    # Find other users who also rated the top 10 beers highly
+    # similarUsers = accessUntappd.getSimilarUsers(usersTopBeers)
 
-# Find how many top 10 beers of user these similar users also rated highly
-accessUntappd.updateSimilarityIndex(similarUsers, usersTopBeers)
+    # Find how many top 10 beers of user these similar users also rated highly
+    # accessUntappd.updateSimilarityIndex(similarUsers, usersTopBeers)
 
-# Obtain list of beer names from menu picture
-menuBeerList = pictureToText.extractBeerNamesFromImg(pictureFile)
+    # Obtain list of beer names from menu picture
+    # menuBeerList = pictureToText.extractBeerNamesFromImg(pictureFile)
 
-# Convert list of 
-menuBeers = accessUntappd.getBeerIds(menuBeerList)
+    # Convert list of 
+    # menuBeers = accessUntappd.getBeerIds(menuBeerList)
 
-# Go through the menu beers and update its score
+    # Go through the menu beers and update its score
 
 
 if __name__=='__main__':

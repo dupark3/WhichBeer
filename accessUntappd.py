@@ -4,24 +4,23 @@ import requests
 import pprint
 
 # API access variables
-clientId = '12345'
-clientSecret = '12345678'
-accessToken = 'accesstoken'
+#accessToken = 'accesstoken'
+client_id = '97759B6FEFAB5D2DCF9398B0067E03B26E7F2C1A'
+client_secret = 'FE8A3493C40B95E16930B07528FF46CCE07954F3'
 baseURL = 'https://api.untappd.com/v4/'
 
 def getUsersTopBeers(user):
     # Get user's JSON data on the top highly rated beers
     res = requests.get(baseURL + 
-        '/user/beers/%s?client_id=%s&client_secret=%s&sort=highest_rated_you' 
-        %(user, clientId, clientSecret))
+        '/user/beers/%s?client_id=%s&client_secret=%s&sort=highest_rated_you&limit=5' 
+        %(user, client_id, client_secret))
     userBeerData = res.json()
-    pprint.pprint(userBeerData)
 
-    # Parse through userBeerData and obtain top 10 beer IDs
+    # Parse through userBeerData and obtain top 5 beer IDs
     ### Could change this to top 10% beers?
     usersTopBeers = []
-    for i in range(max(10,userBeerData['beers']['items']['count'])):
-        usersTopBeers.append(userBeerData['beers']['items'][i]['beer']['bid'])    
+    for i in range(max(5, len(userBeerData['response']['beers']['items']))):
+        usersTopBeers.append(userBeerData['response']['beers']['items'][i]['beer']['bid'])    
 
     return usersTopBeers
 
@@ -37,7 +36,7 @@ def getSimilarUsers(usersTopBeers):
         while (len(similarUsersThisBeer) < len(usersTopBeers) + 1 - i):
             res = requests.get(baseURL + 
                 '/beer/checkins/%s?client_id=%s&client_secret=%smax_id=%s' 
-                %s(usersTopBeers[i], clientId, clientSecret, maxId))
+                %s(usersTopBeers[i], client_id, client_secret, maxId))
             beerActivityData = res.json()
             for i in range(25):
                 # if [rating_score] of returned JSON is > 4
@@ -61,7 +60,7 @@ def updateSimilarityIndex(similarUsers, usersTopBeers):
         while not reachedEndOfBeers or offset > 150:
             res = requests.get(baseURL + 
                 '/user/beers/%s?client_id=%s&client_secret=%s&limit=50&offset=%s&sort=highest_rated_you'
-                %(user, clientId, clientSecret, str(offset)))
+                %(user, client_id, client_secret, str(offset)))
             similarUsersBeerData = res.json()
             count = int(similarUsersBeerData['beers']['count'])
             if count != 0:
@@ -84,7 +83,7 @@ def getBeerIds(menuText):
     for beer in menuText:
         res = requests.get(baseURL + 
             'search/beer/%s?client_id=%s&client_secret=%sq=%s'
-            %(clinetId, clientSecret, beer))
+            %(client_id, client_secret, beer))
         beerSearchData = res.json()
         if beerSearchData['found'] != 0:
             beerIDs.append(beerSearchData['beers']['items'][0]['beer']['bid'])
