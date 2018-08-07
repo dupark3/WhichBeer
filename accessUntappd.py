@@ -28,30 +28,32 @@ def getUsersTopBeers(user):
 def getSimilarUsers(usersTopBeers):
     # Get users who also rated highly the usersTopBeers
     similarUsers = {}
-    count = 0
+    APIRequestsMade = 0
     for i in range(len(usersTopBeers)):
         # get beer activity feed of usersTopBeers[i] 
         maxId = ''
         similarUsersThisBeer = []
         # beer #0 gets 5 similar users, #1 gets 4 similar users, #4 gets 1
-        while (len(similarUsersThisBeer) < len(usersTopBeers) - i):
+        while (len(similarUsersThisBeer) < len(usersTopBeers) - i) and APIRequestsMade < 10:
             #https://api.untappd.com/v4//beer/checkins/36834?client_id=97759B6FEFAB5D2DCF9398B0067E03B26E7F2C1A&client_secret=max_id=%s
             res = requests.get(baseURL + 
                 '/beer/checkins/%s?client_id=%s&client_secret=%s&max_id=%s' 
                 %(usersTopBeers[i], client_id, client_secret, maxId))
             beerActivityData = res.json()['response']['checkins']['items']
-            count += 1
+            APIRequestsMade += 1
             for j in range(25):
                 if beerActivityData[j]['rating_score'] >= 3.75:
                     # get [user_name] and add him to similarUsers
-                    similarUsersThisBeer.append(beerActivityData[j]['user']['user_name'])
-                    similarUsers[beerActivityData[j]['user']['user_name']] += 1
+                    similarUser = beerActivityData[j]['user']['user_name']
+                    if similarUser not in similarUsers:
+                        similarUsersThisBeer.append(similarUser)
+                        similarUsers[similarUser] = 1
+
                 if len(similarUsersThisBeer) == len(usersTopBeers) - i:
                     break
             # obtain checkin_id of the 25th activity, pass it again as max_id
             maxId = beerActivityData[24]['checkin_id']
             # loop through the next 25, so forth, until we get the correct number of similar users
-    print('API Requests made : ' + str(count))
     return similarUsers
 
 def updateSimilarityIndex(similarUsers, usersTopBeers):
