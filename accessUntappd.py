@@ -27,7 +27,7 @@ def getUsersTopBeers(user):
     return usersTopBeers
 
     
-def getSimilarUsers(usersTopBeers):
+def getSimilarUsers(usersTopBeers, user):
     # Get users who also rated highly the usersTopBeers
     topBeersToConsider = 5
     similarUsers = {}
@@ -36,8 +36,9 @@ def getSimilarUsers(usersTopBeers):
         # get beer activity feed of usersTopBeers[i] 
         maxId = ''
         similarUsersThisBeer = []
+
         # beer #0 gets 5 similar users, #1 gets 4 similar users, #4 gets 1
-        while (len(similarUsersThisBeer) < topBeersToConsider - i) and APIRequestsMade < 10:
+        while len(similarUsersThisBeer) < topBeersToConsider - i:
             res = requests.get(baseURL + 
                 '/beer/checkins/%s?client_id=%s&client_secret=%s&max_id=%s' 
                 %(usersTopBeers[i], client_id, client_secret, maxId))
@@ -48,12 +49,12 @@ def getSimilarUsers(usersTopBeers):
                 if beerActivityData[j]['rating_score'] >= 3.75:
                     # get [user_name] and add him to similarUsers
                     similarUser = beerActivityData[j]['user']['user_name']
-                    if similarUser not in similarUsers:
+                    if similarUser not in similarUsers and similarUser != user:
                         similarUsersThisBeer.append(similarUser)
                         similarUsers[similarUser] = []
-
-                if len(similarUsersThisBeer) == len(usersTopBeers) - i:
+                if len(similarUsersThisBeer) == topBeersToConsider - i:
                     break
+
             # obtain checkin_id of the 25th activity, pass it again as max_id
             # OR, if the beer is rare enough that it has fewer than 25 checkins, move on
             if totalActivity < 25:
