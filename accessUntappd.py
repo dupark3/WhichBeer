@@ -32,12 +32,13 @@ def getSimilarUsers(usersTopBeers, user):
     topBeersToConsider = 5
     similarUsers = {}
     APIRequestsMade = 0
+
+    # Outside loop up to 5 top beers of user looking for similar users
     for i in range(min(topBeersToConsider, len(usersTopBeers))):
-        # get beer activity feed of usersTopBeers[i] 
         maxId = ''
         similarUsersThisBeer = []
 
-        # beer #0 gets 5 similar users, #1 gets 4 similar users, #4 gets 1
+        # beer #0 gets 5 similar users, #1 gets 4 similar users, etc
         while len(similarUsersThisBeer) < topBeersToConsider - i:
             res = requests.get(baseURL + 
                 '/beer/checkins/%s?client_id=%s&client_secret=%s&max_id=%s' 
@@ -45,8 +46,10 @@ def getSimilarUsers(usersTopBeers, user):
             beerActivityData = res.json()['response']['checkins']['items']
             totalActivity = int(res.json()['response']['checkins']['count'])
             APIRequestsMade += 1
+
+            # Loop through the returned data looking for users who rated highly
             for j in range(totalActivity):
-                if beerActivityData[j]['rating_score'] >= 3.75:
+                if beerActivityData[j]['rating_score'] >= 4:
                     # get [user_name] and add him to similarUsers
                     similarUser = beerActivityData[j]['user']['user_name']
                     if similarUser not in similarUsers and similarUser != user:
@@ -64,17 +67,19 @@ def getSimilarUsers(usersTopBeers, user):
             # loop through the next 25, so forth, until we get the correct number of similar users
     return similarUsers
 
-def updateSimilarityIndex(similarUsers, usersTopBeers):
+def getSimilarUsersTopBeers(similarUsers, usersTopBeers):
     # Store similarUsers' similarity index (number of beers matched)
     APIRequestsMade = 0
+
     for user, similarityIndex in similarUsers.items():
-        # First, check top 50 beers for ones rated >=4 from similar user
+        # Gather similarUser's top beers
         res = requests.get(baseURL + 
             '/user/beers/%s?client_id=%s&client_secret=%s&limit=50&sort=highest_rated_you'
             %(user, client_id, client_secret))
         APIRequestsMade += 1
         similarUsersBeerData = res.json()['response']['beers']['items']
 
+        # Add each top beer until we run out of beers or hit lower than 3.75 rating
         for j in range(len(similarUsersBeerData)):
             if similarUsersBeerData[j]['rating_score'] >= 3.75:
                 similarUsers[user].append(similarUsersBeerData[j]['beer']['bid'])
@@ -93,15 +98,19 @@ def updateSimilarityIndex(similarUsers, usersTopBeers):
     # End of for loop, move on to next similarUser
 
 
-def getBeerIds(menuText):
-    beerIDs = []
-    for beer in menuText:
+def getBeerIds(menuBeers):
+    beerIDs = {}
+    for beer in menuBeers:
         res = requests.get(baseURL + 
-            'search/beer/%s?client_id=%s&client_secret=%sq=%s'
+            'search/beer?client_id=%s&client_secret=%s&q=%s'
             %(client_id, client_secret, beer))
-        beerSearchData = res.json()
+        print(res.text)
+        print('\n\n')
+        beerSearchData = res.json()['response']
+        pprint.pprint(beerSearchData)
         if beerSearchData['found'] != 0:
-            beerIDs.append(beerSearchData['beers']['items'][0]['beer']['bid'])
+            beerIDs[beer] = beerSearchData['beers']['items'][0]['beer']['bid']
+
     return beerIDs
 
 
